@@ -8,6 +8,9 @@
 - `packages/widget`、`packages/mcp-server`、`packages/shared` の雛形作成。
 - TypeScript 5系、ESLint、Prettier、Vitest/Turboなどの共通設定。
 
+## 前提Issue
+- なし
+
 ## 完了条件
 - `pnpm install` 後にすべてのパッケージで型チェックとLintが通る。
 - `turbo run build`（または同等コマンド）でウィジェットとサーバーのビルドが成功する。

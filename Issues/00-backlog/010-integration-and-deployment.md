@@ -8,6 +8,9 @@
 - ChatGPT Developer ModeでのConnector登録手順ドキュメント化。
 - E2Eテスト（Playwright等）とゴールデンプロンプト検証。
 
+## 前提Issue
+- 001〜009（全実装タスク）完了後に着手
+
 ## 完了条件
 - `pnpm dev:mcp` + `pnpm dev:widget` 実行後、ngrok URLをConnectorに設定して保存→閲覧→検索のフローがチャット内で確認できる。
 - Playwright（または相当）でノート作成〜編集〜検索のUIフローを自動化したテストが追加されている。

@@ -8,6 +8,11 @@
 - 以下のツール実装: `notes.list`, `notes.create`, `notes.update`, `notes.search`, `notes.generateDraft`（チャット文脈→Markdown下書き）。
 - structuredContentとUIテンプレ（HTMLリソース）を結びつけるメタ定義。
 
+## 前提Issue
+- 001: モノレポ基盤構築
+- 002: ドメインモデルと共通ユーティリティ定義
+- 003: ファイルストア層の実装
+
 ## 完了条件
 - MCP Inspectorで上記ツールが列挙され、呼び出し→レスポンスが成功する。
 - 各ツールがファイルストア層（Issue003）とshared型（Issue002）を利用して動作する。

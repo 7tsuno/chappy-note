@@ -8,6 +8,9 @@
 - Markdownテンプレ適用に必要なヘルパー関数。
 - ChatGPT structuredContentとのシリアライズ/デシリアライズ補助。
 
+## 前提Issue
+- 001: モノレポ基盤構築
+
 ## 完了条件
 - `packages/shared` から `import { NoteSchema }` などを行うと型チェックが通り、サーバーとウィジェットの両方で再利用できる。
 - サンプルノートデータを使った型テスト/Vitestが追加されている。
