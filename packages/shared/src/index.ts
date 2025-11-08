@@ -33,7 +33,8 @@ export const NoteMetadataSchema = z.object({
   sourceConversationId: z.string().optional(),
   contentPath: z.string(),
   createdAt: isoDateSchema,
-  updatedAt: isoDateSchema
+  updatedAt: isoDateSchema,
+  summary: z.string().optional()
 });
 
 export const NoteContentSchema = NoteMetadataSchema.extend({
