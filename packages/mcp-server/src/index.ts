@@ -44,7 +44,7 @@ server.tool(
           text: 'pong',
         },
       ],
-      structuredContent: [structuredContent],
+      structuredContent,
     };
   }
 );
