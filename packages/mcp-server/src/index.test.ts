@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { NoteSchema } from '@chappy/shared';
+import { NoteMetadataSchema } from '@chappy/shared';
 
 describe('placeholder', () => {
   it('imports shared schema', () => {
-    expect(NoteSchema.safeParse).toBeDefined();
+    expect(NoteMetadataSchema.safeParse).toBeDefined();
   });
 });

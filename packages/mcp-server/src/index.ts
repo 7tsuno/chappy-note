@@ -1,29 +1,67 @@
 import Fastify from 'fastify';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { NotePreviewPayloadSchema } from '@chappy/shared';
 
 const fastify = Fastify({
-  logger: true
+  logger: true,
 });
 
 const server = new McpServer({ name: 'chappy-note-mcp', version: '0.0.0' });
 
+const transport = new StreamableHTTPServerTransport({
+  sessionIdGenerator: undefined,
+  enableJsonResponse: true,
+});
+
 // TODO: register tools once storage layer is ready.
-server.tool('notes.ping', {
-  description: 'ヘルスチェック用仮ツール',
-  inputSchema: { type: 'object', properties: {} }
-}, async () => ({
-  content: [
-    {
-      type: 'text',
-      text: 'pong'
-    }
-  ]
-}));
+server.tool(
+  'notes.ping',
+  {
+    description: 'ヘルスチェック用仮ツール',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  async () => {
+    const structuredContent = NotePreviewPayloadSchema.parse({
+      type: 'notePreview',
+      notes: [
+        {
+          id: '00000000-0000-4000-8000-000000000000',
+          title: 'Sample Note',
+          tags: ['sample'],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          excerpt: 'Preview data is not yet connected to storage.',
+        },
+      ],
+      total: 1,
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: 'pong',
+        },
+      ],
+      structuredContent: [structuredContent],
+    };
+  }
+);
+
+await server.connect(transport);
 
 fastify.all('/mcp', async (request, reply) => {
-  const transport = server.createHttpHandler();
-  await transport(request.raw, reply.raw);
-  return reply;
+  reply.hijack();
+  try {
+    await transport.handleRequest(request.raw, reply.raw, request.body);
+  } catch (error) {
+    fastify.log.error(error);
+    if (!reply.raw.headersSent) {
+      reply.raw.statusCode = 500;
+      reply.raw.end('Internal Server Error');
+    }
+  }
 });
 
 const port = Number(process.env.PORT ?? 4000);
