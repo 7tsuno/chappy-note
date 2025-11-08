@@ -1,0 +1,22 @@
+{
+  "name": "@chappy/shared",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --outDir dist",
+    "lint": "eslint src",
+    "test": "vitest --run"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}
