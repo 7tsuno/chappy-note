@@ -1,24 +1,21 @@
-# 010: 統合テストとデプロイ準備
+# 010: 統合確認（最小版）
 
 ## 目的
-- ウィジェットとMCPサーバーを結合し、ngrok経由でChatGPT Developer Modeに接続できる状態まで仕上げる。E2Eテストや運用手順を整備し、MVP完成とする。
+- ウィジェットとMCPサーバーを結合し、ChatGPT Developer Modeでノートの保存・閲覧・検索が手動で確認できる状態にする。ドキュメント整備や自動テストの実装は今回のスコープ外とする。
 
 ## スコープ
-- ngrok/Cloudflare Tunnelなどのトンネル設定とSecrets管理。
-- ChatGPT Developer ModeでのConnector登録手順ドキュメント化。
-- E2Eテスト（Playwright等）とゴールデンプロンプト検証。
+- `pnpm dev:mcp` / `pnpm dev:widget` などローカル開発コマンドで両者を同時起動できるようにする。
+- ngrokなどのトンネル経由でConnectorに接続し、チャット内で実際のノート操作が行えることを確認する。
+- 結合確認に必要な最小限の設定・ログ確認のみ対応し、手順ドキュメント化や自動テスト追加は行わない。
 
 ## 前提Issue
-- 001〜009（全実装タスク）完了後に着手
+- 001〜009（全実装タスク）完了後に着手。
 
 ## 完了条件
-- `pnpm dev:mcp` + `pnpm dev:widget` 実行後、ngrok URLをConnectorに設定して保存→閲覧→検索のフローがチャット内で確認できる。
-- Playwright（または相当）でノート作成〜編集〜検索のUIフローを自動化したテストが追加されている。
-- `docs/deployment.md` 等にトンネル起動手順、Connector更新手順、E2Eチェックリストが記載されている。
+- `pnpm dev:mcp` と `pnpm dev:widget` を起動し、公開URL（例: ngrok）をChatGPT Developer ModeのConnectorに設定した際に、保存→閲覧→検索のフローが実際に完了する。
+- 結合確認中に発生した問題はIssueコメント等で共有し、最終的に人手で「動作OK」と判断できる状態になっている。
 
 ## 作業リスト
-1. ngrok設定ファイルを用意し、HTTPS必須・BasicAuth設定など最低限のセキュリティを確保。
-2. `pnpm dev`系スクリプトを整備し、ウィジェット/サーバーの同時起動を簡単にする。
-3. ChatGPT Developer ModeでConnectorを作成し、接続確認ログやトラブルシューティングを記録。
-4. Playwrightでウィジェットの主要フロー（ノート作成→編集→検索→参照）を自動化テスト化。
-5. READMEまたは専用ドキュメントにデプロイ/E2E手順と既知の制約をまとめ、MVP完了条件を明文化。
+1. ngrok等のトンネル設定を最小限で整え、MCPサーバーを外部に公開できるようにする。
+2. `pnpm dev:mcp` と `pnpm dev:widget` を並行起動し、ウィジェットがMCPサーバーと通信できることを確認する。
+3. ChatGPT Developer ModeにConnectorを登録し、チャット上でノートの保存・閲覧・検索フローを人手で検証する。

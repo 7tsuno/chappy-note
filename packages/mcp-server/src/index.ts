@@ -6,7 +6,7 @@ import Fastify from 'fastify';
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { ConversationContextSchema } from '@chappy/shared';
+import { ConversationContextSchema, NotePreview } from '@chappy/shared';
 
 import { FileNoteStore } from './store/fileNoteStore.js';
 import { NotesService, MAX_LIST_LIMIT } from './services/notesService.js';
@@ -162,10 +162,20 @@ server.registerTool(
       const labels: string[] = [];
       if (args.query) labels.push(`キーワード: "${args.query}"`);
       if (result.appliedTags.length) labels.push(`タグ: ${result.appliedTags.join(', ')}`);
-      const labelText = labels.length ? `（${labels.join(' / ')}）` : '';
-      const message = result.payload.notes.length
-        ? `${result.payload.notes.length}件の検索結果${labelText}を返しました。`
-        : `該当するノートは見つかりませんでした${labelText}。`;
+      const message = buildSearchMessage({
+        total: result.total,
+        labels,
+        topNote: result.payload.notes[0],
+      });
+      fastify.log.info(
+        {
+          toolName: 'notes.search',
+          query: result.query,
+          appliedTags: result.appliedTags,
+          hitCount: result.total,
+        },
+        'notes.search stats'
+      );
       return createToolResponse(result.payload, message, {
         searchContext: {
           query: result.query,
@@ -290,6 +300,32 @@ function buildListMessage(total: number, count: number, tags: string[]) {
   }
   const tagText = tags.length ? `（タグ: ${tags.join(', ')}）` : '';
   return `最新${count}件のノート${tagText}を返しました（全${total}件）。`;
+}
+
+function buildSearchMessage({
+  total,
+  labels,
+  topNote,
+}: {
+  total: number;
+  labels: string[];
+  topNote?: NotePreview;
+}) {
+  const labelText = labels.length ? `（${labels.join(' / ')}）` : '';
+  if (!total || !topNote) {
+    return `該当するノートは見つかりませんでした${labelText}。キーワードを短くするか、タグを外して再検索してみてください。`;
+  }
+  const excerpt = topNote.excerpt?.replace(/\s+/g, ' ').trim();
+  const trimmedExcerpt =
+    excerpt && excerpt.length > 80 ? `${excerpt.slice(0, 80)}…` : excerpt;
+  const summaryLine = trimmedExcerpt ? `抜粋: ${trimmedExcerpt}` : '';
+  return [
+    `${total}件の検索結果${labelText}が見つかりました。`,
+    `最も関連度が高いのは「${topNote.title}」。${summaryLine}`.trim(),
+    '詳しく見たい場合は「開いて」と指示してください。',
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 type ToolResponse = {
