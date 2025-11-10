@@ -199,3 +199,7 @@ export const renderNoteMarkdown = ({
     .filter((line, index, all) => !(line === '' && all[index - 1] === ''))
     .join('\n');
 };
+
+export { notePreviewFixture } from './fixtures/notePreviewFixture';
+export { noteDetailFixture } from './fixtures/noteDetailFixture';
+export { noteEditorDraftFixture } from './fixtures/noteEditorDraftFixture';

@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "lint": "eslint src",
     "test": "vitest --run",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build"
   },
   "dependencies": {
     "@chappy/shared": "workspace:*",
@@ -21,6 +23,9 @@
     "@testing-library/react": "^16.0.0",
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.2",
-    "jsdom": "^25.0.1"
+    "jsdom": "^25.0.1",
+    "@storybook/addon-essentials": "^8.2.6",
+    "@storybook/react-vite": "^8.2.6",
+    "storybook": "^8.2.6"
   }
 }

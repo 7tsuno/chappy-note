@@ -3,8 +3,9 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 
 describe('App', () => {
-  it('renders placeholder text', () => {
+  it('renders widget shell and loading state', () => {
     render(<App />);
-    expect(screen.getByText('Chappy Note Widget')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Chappy Note' })).toBeInTheDocument();
+    expect(screen.getByText('ノートを読み込み中です…')).toBeInTheDocument();
   });
 });

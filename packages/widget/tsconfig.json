@@ -2,7 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "@chappy/shared": ["../../shared/src/index.ts"],
+      "@chappy/shared/*": ["../../shared/src/*"]
+    }
   },
   "include": ["src", "vite.config.ts"],
   "exclude": ["dist", "node_modules"]
