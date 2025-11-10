@@ -202,7 +202,7 @@ export const renderNoteMarkdown = ({
     .join('\n');
 };
 
-export { notePreviewFixture } from './fixtures/notePreviewFixture';
-export { noteDetailFixture } from './fixtures/noteDetailFixture';
-export { noteEditorDraftFixture } from './fixtures/noteEditorDraftFixture';
-export { noteEditorEditFixture } from './fixtures/noteEditorEditFixture';
+export { notePreviewFixture } from './fixtures/notePreviewFixture.js';
+export { noteDetailFixture } from './fixtures/noteDetailFixture.js';
+export { noteEditorDraftFixture } from './fixtures/noteEditorDraftFixture.js';
+export { noteEditorEditFixture } from './fixtures/noteEditorEditFixture.js';
