@@ -66,6 +66,9 @@ export const OpenAiBridgeProvider = ({ children, runtime: providedRuntime }: Ope
     (next: unknown | ((previous: unknown) => unknown)) => {
       const previous = runtime.getWidgetStateSnapshot();
       const value = typeof next === 'function' ? (next as (prev: unknown) => unknown)(previous) : next;
+      if (Object.is(value, previous)) {
+        return;
+      }
       runtime.setWidgetState(value);
     },
     [runtime]
