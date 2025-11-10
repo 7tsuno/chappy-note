@@ -3,9 +3,11 @@ import { WidgetShell } from '../components/WidgetShell/WidgetShell';
 import {
   noteDetailFixture,
   noteEditorDraftFixture,
+  noteEditorEditFixture,
   notePreviewFixture,
 } from '@chappy/shared';
 import type { ToolOutputEnvelope } from '../types/openai';
+import { createDraftSignature, createNoteEditorFormValues, type WidgetState } from '../types/widgetState';
 
 const meta: Meta<typeof WidgetShell> = {
   title: 'Widget/WidgetShell',
@@ -20,11 +22,15 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-const withToolOutput = (toolOutput: ToolOutputEnvelope, themeMode: 'light' | 'dark' = 'light') => ({
+const withToolOutput = (
+  toolOutput: ToolOutputEnvelope,
+  options?: { themeMode?: 'light' | 'dark'; widgetState?: WidgetState }
+) => ({
   parameters: {
     openaiMock: {
       toolOutput,
-      themeMode,
+      themeMode: options?.themeMode,
+      widgetState: options?.widgetState,
     },
   },
 });
@@ -52,15 +58,37 @@ export const NoteDetail: Story = {
   ...withToolOutput({ status: 'completed', structuredContent: noteDetailFixture }),
 };
 
-export const NoteEditor: Story = {
-  name: 'Note editor',
+export const NoteEditorCreate: Story = {
+  name: 'Note editor (create)',
   ...withToolOutput({ status: 'completed', structuredContent: noteEditorDraftFixture }),
+};
+
+export const NoteEditorEdit: Story = {
+  name: 'Note editor (edit)',
+  ...withToolOutput({ status: 'completed', structuredContent: noteEditorEditFixture }),
+};
+
+const validationWidgetState: WidgetState = {
+  noteEditor: {
+    draftSignature: createDraftSignature(noteEditorDraftFixture),
+    values: {
+      ...createNoteEditorFormValues(noteEditorDraftFixture),
+      title: '',
+      content: '',
+    },
+    showValidationErrors: true,
+  },
+};
+
+export const NoteEditorValidationErrors: Story = {
+  name: 'Note editor (validation errors)',
+  ...withToolOutput(
+    { status: 'completed', structuredContent: noteEditorDraftFixture },
+    { widgetState: validationWidgetState }
+  ),
 };
 
 export const DarkMode: Story = {
   name: 'Dark mode preview',
-  ...withToolOutput(
-    { status: 'completed', structuredContent: notePreviewFixture },
-    'dark'
-  ),
+  ...withToolOutput({ status: 'completed', structuredContent: notePreviewFixture }, { themeMode: 'dark' }),
 };

@@ -1,9 +1,13 @@
+type CustomOpenAiDisplayMode = {
+  readonly __openAiDisplayModeBrand?: never;
+};
+
 export type OpenAiDisplayMode =
   | 'default'
   | 'compact'
   | 'expanded'
   | 'full-screen'
-  | (string & {});
+  | (string & CustomOpenAiDisplayMode);
 
 export type ToolOutputStatus = 'idle' | 'in_progress' | 'completed' | 'error';
 

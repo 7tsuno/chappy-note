@@ -205,3 +205,4 @@ export const renderNoteMarkdown = ({
 export { notePreviewFixture } from './fixtures/notePreviewFixture';
 export { noteDetailFixture } from './fixtures/noteDetailFixture';
 export { noteEditorDraftFixture } from './fixtures/noteEditorDraftFixture';
+export { noteEditorEditFixture } from './fixtures/noteEditorEditFixture';

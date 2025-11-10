@@ -2,6 +2,7 @@ import './WidgetShell.css';
 import { Fragment } from 'react';
 import { useStructuredContentState } from '../../hooks/useStructuredContentState';
 import type { NotePreview } from '@chappy/shared';
+import { NoteEditor } from '../NoteEditor/NoteEditor';
 
 const LoadingState = ({ label }: { label: string }) => (
   <div className="widget-shell__status" role="status" aria-live="polite">
@@ -104,54 +105,7 @@ export const WidgetShell = (): JSX.Element => {
             )}
           </article>
         )}
-        {state.status === 'ready' && state.view === 'editor' && (
-          <section className="widget-shell__editor">
-            <h2 className="widget-shell__section-title">
-              {state.payload.mode === 'create' ? '新しいノートを作成' : 'ノートを編集'}
-            </h2>
-            <div className="widget-shell__editor-field">
-              <label htmlFor="note-title">タイトル</label>
-              <input
-                id="note-title"
-                className="widget-shell__editor-input"
-                value={state.payload.draft.title}
-                readOnly
-              />
-            </div>
-            <div className="widget-shell__editor-field">
-              <label htmlFor="note-tags">タグ</label>
-              <input
-                id="note-tags"
-                className="widget-shell__editor-input"
-                value={state.payload.draft.tags?.join(', ') ?? ''}
-                readOnly
-              />
-            </div>
-            <div className="widget-shell__editor-field">
-              <label htmlFor="note-content">本文</label>
-              <textarea
-                id="note-content"
-                className="widget-shell__editor-textarea"
-                value={state.payload.draft.content}
-                readOnly
-              />
-            </div>
-            {state.payload.draft.summary && (
-              <div className="widget-shell__editor-field">
-                <label htmlFor="note-summary">要約</label>
-                <textarea
-                  id="note-summary"
-                  className="widget-shell__editor-textarea"
-                  value={state.payload.draft.summary}
-                  readOnly
-                />
-              </div>
-            )}
-            <p className="widget-shell__editor-hint">
-              編集操作はまもなく追加されます。ChatGPTとの会話を続けながらノートを整えましょう。
-            </p>
-          </section>
-        )}
+        {state.status === 'ready' && state.view === 'editor' && <NoteEditor payload={state.payload} />}
       </main>
       <footer className="widget-shell__footer">
         <span>Chappy Note • Developer Preview</span>
