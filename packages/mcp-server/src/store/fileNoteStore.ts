@@ -8,6 +8,7 @@ import {
   normalizeTag,
   renderNoteMarkdown,
 } from '@chappy/shared';
+import { filterByTags, fullTextSearch } from '../search/searchEngine.js';
 
 export interface CreateNoteInput {
   title: string;
@@ -128,29 +129,13 @@ export class FileNoteStore {
   async searchNotes(options: SearchOptions): Promise<NoteMetadata[]> {
     const index = await this.readIndex();
     const tags = options.tags ? this.normalizeTags(options.tags) : [];
-    const query = options.query?.toLowerCase();
-    const notes = index.notes.filter((note) => {
-      const matchesTags = tags.length ? tags.every((tag) => note.tags.includes(tag)) : true;
-      return matchesTags;
-    });
-
+    const filtered = filterByTags(index.notes, tags);
+    const query = options.query?.trim();
     if (!query) {
-      return notes;
+      return filtered;
     }
 
-    const results: NoteMetadata[] = [];
-    for (const note of notes) {
-      const content = await this.readRawContent(note.id);
-      const summary = note.summary?.toLowerCase() ?? '';
-      if (
-        note.title.toLowerCase().includes(query) ||
-        summary.includes(query) ||
-        content.toLowerCase().includes(query)
-      ) {
-        results.push(note);
-      }
-    }
-    return results;
+    return fullTextSearch(filtered, query, (note) => this.readRawContent(note.id));
   }
 
   private async readIndex(): Promise<IndexFile> {

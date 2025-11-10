@@ -78,7 +78,8 @@ describe('NotesService', () => {
     });
 
     expect(payload.draft.title).toContain('Weekly');
-    expect(payload.draft.tags).toEqual(['weekly-notes', 'team']);
+    expect(payload.draft.tags?.slice(0, 2)).toEqual(['weekly-notes', 'team']);
+    expect((payload.draft.tags ?? []).length).toBeGreaterThan(2);
     expect(payload.draft.content).toContain('### User');
     expect(payload.suggestions.tags).toEqual(payload.draft.tags);
   });
@@ -94,5 +95,16 @@ describe('NotesService', () => {
     expect(result.payload.note.title).toBe('Zod basics');
     expect(result.listSnapshot.notes[0].title).toBe('Zod basics');
     expect(result.listSnapshot.total).toBe(1);
+  });
+
+  it('auto assigns tags on create when none are provided', async () => {
+    const { service } = await createService();
+    const result = await service.createNote({
+      title: 'GraphQL Clients',
+      content: 'Compare Apollo Client to URQL for GraphQL caching strategies.',
+    });
+
+    expect(result.payload.note.tags.length).toBeGreaterThan(0);
+    expect(result.payload.note.tags).toContain('graphql');
   });
 });

@@ -16,6 +16,7 @@ import {
 } from '@chappy/shared';
 
 import { FileNoteStore } from '../store/fileNoteStore.js';
+import { TagEngine } from '../utils/tagEngine.js';
 
 export const DEFAULT_LIST_LIMIT = 20;
 export const MAX_LIST_LIMIT = 50;
@@ -66,7 +67,10 @@ export interface DetailResult {
 }
 
 export class NotesService {
-  constructor(private readonly store: FileNoteStore) {}
+  constructor(
+    private readonly store: FileNoteStore,
+    private readonly tagEngine: TagEngine = new TagEngine()
+  ) {}
 
   async listNotes(options: ListOptions = {}): Promise<ListResult> {
     const limit = this.clampNumber(options.limit ?? DEFAULT_LIST_LIMIT, 1, MAX_LIST_LIMIT);
@@ -146,7 +150,16 @@ export class NotesService {
   }
 
   async createNote(input: CreateNoteOptions): Promise<DetailResult> {
-    const tags = this.normalizeTags(input.tags);
+    let tags = this.normalizeTags(input.tags);
+    if (!tags.length) {
+      const auto = this.tagEngine.suggestFromContent({
+        title: input.title,
+        content: input.content,
+        summary: input.summary,
+        hints: input.tags,
+      });
+      tags = this.normalizeTags(auto);
+    }
     const note = await this.store.createNote({
       ...input,
       tags,
@@ -171,7 +184,11 @@ export class NotesService {
   }
 
   async generateDraft(options: GenerateDraftOptions): Promise<NoteEditorDraftPayload> {
-    const tagSuggestions = this.normalizeTags(options.tagHints);
+    const normalizedHints = this.normalizeTags(options.tagHints);
+    const tagSuggestions = this.tagEngine.suggestFromConversation(
+      options.conversationContext,
+      normalizedHints
+    );
     const { conversationContext } = options;
     const title = this.resolveTitle(options.titleHint, conversationContext.topic, conversationContext.turns);
     const summary = this.resolveSummary(options.summaryHint, conversationContext.turns);

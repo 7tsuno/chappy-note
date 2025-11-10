@@ -3,11 +3,13 @@ import { z } from 'zod';
 export const TAG_MAX_LENGTH = 32;
 export const TAG_MAX_COUNT = 10;
 
+const NON_TAG_CHAR_REGEX = /[^\p{L}\p{N}\s-]/gu;
+
 export const normalizeTag = (raw: string): string =>
   raw
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9-\s]/g, '')
+    .replace(NON_TAG_CHAR_REGEX, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
@@ -16,8 +18,8 @@ export const TagSchema = z
   .string()
   .min(1)
   .max(TAG_MAX_LENGTH)
-  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, {
-    message: 'Tags must contain lowercase alphanumerics and single hyphens only'
+  .regex(new RegExp('^[\\p{L}\\p{N}]+(?:-[\\p{L}\\p{N}]+)*$', 'u'), {
+    message: 'Tags must contain letters/numbers with optional single hyphens only'
   });
 
 export const TagsSchema = z.array(TagSchema).max(TAG_MAX_COUNT).default([]);

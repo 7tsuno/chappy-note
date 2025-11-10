@@ -31,9 +31,15 @@ describe('NoteMetadataSchema', () => {
 });
 
 describe('TagsSchema & normalizeTag', () => {
-  it('normalizes and validates tags', () => {
+  it('normalizes and validates english tags', () => {
     const normalized = normalizeTag(' Data Science! ');
     expect(normalized).toBe('data-science');
+    expect(() => TagsSchema.parse([normalized])).not.toThrow();
+  });
+
+  it('allows japanese characters', () => {
+    const normalized = normalizeTag(' 週次 レトロ ');
+    expect(normalized).toBe('週次-レトロ');
     expect(() => TagsSchema.parse([normalized])).not.toThrow();
   });
 });
