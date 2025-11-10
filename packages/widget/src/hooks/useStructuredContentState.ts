@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   NoteDetailPayloadSchema,
   NoteEditorDraftPayloadSchema,
@@ -49,6 +49,10 @@ const mapStructuredContentToState = (
 
 export const useStructuredContentState = (): StructuredContentState => {
   const toolOutput = useToolOutput<ToolOutputEnvelope | undefined>();
+  useEffect(() => {
+    if (!toolOutput) return;
+    console.debug('[ChappyNote] toolOutput snapshot', toolOutput);
+  }, [toolOutput]);
 
   return useMemo<StructuredContentState>(() => {
     if (!toolOutput) {
@@ -72,11 +76,12 @@ export const useStructuredContentState = (): StructuredContentState => {
       };
     }
 
-    const structuredContent = toolOutput.structuredContent;
+    const structuredContent = extractStructuredContent(toolOutput);
     if (!structuredContent) {
       return {
         status: 'error',
         message: 'No structuredContent payload received from tool output.',
+        details: { toolOutput },
         toolName: toolOutput.toolName,
       };
     }
@@ -107,4 +112,46 @@ export const useStructuredContentState = (): StructuredContentState => {
       toolName: toolOutput.toolName,
     };
   }, [toolOutput]);
+};
+
+const extractStructuredContent = (output: ToolOutputEnvelope) => {
+  if (isStructuredContentPayload(output)) {
+    return output;
+  }
+
+  if (output.structuredContent != null) {
+    return output.structuredContent;
+  }
+
+  const result = output.result;
+  if (!result) {
+    return undefined;
+  }
+
+  if ((result as { structuredContent?: unknown }).structuredContent != null) {
+    return (result as { structuredContent?: unknown }).structuredContent;
+  }
+
+  if ((result as { structured_content?: unknown }).structured_content != null) {
+    return (result as { structured_content?: unknown }).structured_content;
+  }
+
+  const data = (result as { data?: unknown }).data;
+  if (data && typeof data === 'object') {
+    const dataRecord = data as { structuredContent?: unknown; structured_content?: unknown };
+    if (dataRecord.structuredContent != null) {
+      return dataRecord.structuredContent;
+    }
+    if (dataRecord.structured_content != null) {
+      return dataRecord.structured_content;
+    }
+  }
+
+  return undefined;
+};
+
+const isStructuredContentPayload = (value: unknown): value is StructuredContent => {
+  if (!value || typeof value !== 'object') return false;
+  const data = value as { type?: unknown };
+  return data.type === 'notePreview' || data.type === 'noteDetail' || data.type === 'noteEditorDraft';
 };

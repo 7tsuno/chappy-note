@@ -20,9 +20,14 @@ const LoadingState = ({ label }: { label: string }) => (
   </div>
 );
 
-const ErrorState = ({ message }: { message: string }) => (
+const ErrorState = ({ message, details }: { message: string; details?: unknown }) => (
   <div className="widget-shell__status" role="alert">
     <p className="widget-shell__status-text widget-shell__status-text--error">{message}</p>
+    {details ? (
+      <pre className="widget-shell__status-debug" aria-live="polite">
+        {JSON.stringify(details, null, 2)}
+      </pre>
+    ) : null}
   </div>
 );
 
@@ -792,7 +797,10 @@ export const WidgetShell = (): JSX.Element => {
           />
         )}
         {state.status === 'error' && (
-          <ErrorState message={state.message ?? 'ウィジェットの読み込みに失敗しました。'} />
+          <ErrorState
+            message={state.message ?? 'ウィジェットの読み込みに失敗しました。'}
+            details={state.details}
+          />
         )}
         {state.status === 'ready' && state.view === 'list' && (
           <NoteListSection

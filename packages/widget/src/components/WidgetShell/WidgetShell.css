@@ -325,6 +325,20 @@
   color: #b42318;
 }
 
+.widget-shell__status-debug {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--openai-text-color) 8%, transparent);
+  color: color-mix(in srgb, var(--openai-text-color) 90%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow: auto;
+}
+
 .widget-shell__skeleton {
   border-radius: 6px;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.04));

@@ -16,13 +16,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const widgetDistDir = path.resolve(__dirname, '../../widget/dist');
 const widgetHtml = await loadWidgetTemplate(widgetDistDir);
 
-const widgetResourceUri = 'resource://chappy-note/widget';
+const widgetResourceUri = 'ui://chappy-note/widget';
 const baseWidgetMeta = {
-  'openai/outputTemplate': {
-    id: 'chappy-note-widget',
-    resource: widgetResourceUri,
-    version: '0.1.0',
-    layout: 'main',
+  'openai/outputTemplate': widgetResourceUri,
+  'openai/widgetAccessible': true,
+  'openai/resultCanProduceWidget': true,
+  'openai/toolInvocation': {
+    invoking: 'Chappy Noteウィジェットを準備しています…',
+    invoked: 'Chappy Noteウィジェットを更新しました。',
   },
   'openai/widgetCSP': {
     resource_domains: [],
@@ -30,6 +31,8 @@ const baseWidgetMeta = {
   },
   'openai/widgetPrefersBorder': true,
 };
+
+const createToolMeta = () => structuredClone(baseWidgetMeta);
 
 const fastify = Fastify({ logger: true });
 const server = new McpServer({ name: 'chappy-note-mcp', version: '0.0.0' });
@@ -125,6 +128,7 @@ server.registerTool(
       destructiveHint: false,
       openWorldHint: false,
     },
+    _meta: createToolMeta(),
   },
   async (rawArgs: unknown) =>
     withTool('notes.list', async () => {
@@ -154,6 +158,7 @@ server.registerTool(
       destructiveHint: false,
       openWorldHint: false,
     },
+    _meta: createToolMeta(),
   },
   async (rawArgs: unknown) =>
     withTool('notes.search', async () => {
@@ -198,6 +203,7 @@ server.registerTool(
       idempotentHint: false,
       openWorldHint: false,
     },
+    _meta: createToolMeta(),
   },
   async (rawArgs: unknown) =>
     withTool('notes.create', async () => {
@@ -223,6 +229,7 @@ server.registerTool(
       idempotentHint: false,
       openWorldHint: false,
     },
+    _meta: createToolMeta(),
   },
   async (rawArgs: unknown) =>
     withTool('notes.update', async () => {
@@ -254,6 +261,7 @@ server.registerTool(
       idempotentHint: true,
       openWorldHint: false,
     },
+    _meta: createToolMeta(),
   },
   async (rawArgs: unknown) =>
     withTool('notes.generateDraft', async () => {

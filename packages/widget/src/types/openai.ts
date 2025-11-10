@@ -11,9 +11,18 @@ export type OpenAiDisplayMode =
 
 export type ToolOutputStatus = 'idle' | 'in_progress' | 'completed' | 'error';
 
+export type ToolOutputResult = {
+  structuredContent?: unknown;
+  structured_content?: unknown;
+  data?: unknown;
+  metadata?: unknown;
+  content?: unknown;
+};
+
 export interface ToolOutputEnvelope {
   status?: ToolOutputStatus;
   structuredContent?: unknown;
+  result?: ToolOutputResult | null;
   toolName?: string;
   callId?: string;
   error?: { message: string; code?: string } | null;
