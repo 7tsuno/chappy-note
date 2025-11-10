@@ -14,21 +14,31 @@ type StructuredContent = NotePreviewPayload | NoteDetailPayload | NoteEditorDraf
 
 type LoadingReason = 'waiting-for-tool-output' | 'in-progress';
 
+type ReadyState<View extends 'list' | 'detail' | 'editor', Payload> = {
+  status: 'ready';
+  view: View;
+  payload: Payload;
+  toolName?: string;
+};
+
 export type StructuredContentState =
   | { status: 'loading'; reason: LoadingReason; toolName?: string }
-  | { status: 'error'; message: string; details?: unknown }
-  | { status: 'ready'; view: 'list'; payload: NotePreviewPayload }
-  | { status: 'ready'; view: 'detail'; payload: NoteDetailPayload }
-  | { status: 'ready'; view: 'editor'; payload: NoteEditorDraftPayload };
+  | { status: 'error'; message: string; details?: unknown; toolName?: string }
+  | ReadyState<'list', NotePreviewPayload>
+  | ReadyState<'detail', NoteDetailPayload>
+  | ReadyState<'editor', NoteEditorDraftPayload>;
 
-const mapStructuredContentToState = (content: StructuredContent): StructuredContentState => {
+const mapStructuredContentToState = (
+  content: StructuredContent,
+  toolName?: string
+): StructuredContentState => {
   switch (content.type) {
     case 'notePreview':
-      return { status: 'ready', view: 'list', payload: content };
+      return { status: 'ready', view: 'list', payload: content, toolName };
     case 'noteDetail':
-      return { status: 'ready', view: 'detail', payload: content };
+      return { status: 'ready', view: 'detail', payload: content, toolName };
     case 'noteEditorDraft':
-      return { status: 'ready', view: 'editor', payload: content };
+      return { status: 'ready', view: 'editor', payload: content, toolName };
     default: {
       const exhaustiveCheck: never = content;
       void exhaustiveCheck;
@@ -58,6 +68,7 @@ export const useStructuredContentState = (): StructuredContentState => {
         status: 'error',
         message: toolOutput.error.message,
         details: toolOutput.error,
+        toolName: toolOutput.toolName,
       };
     }
 
@@ -66,22 +77,23 @@ export const useStructuredContentState = (): StructuredContentState => {
       return {
         status: 'error',
         message: 'No structuredContent payload received from tool output.',
+        toolName: toolOutput.toolName,
       };
     }
 
     const previewResult = NotePreviewPayloadSchema.safeParse(structuredContent);
     if (previewResult.success) {
-      return mapStructuredContentToState(previewResult.data);
+      return mapStructuredContentToState(previewResult.data, toolOutput.toolName);
     }
 
     const detailResult = NoteDetailPayloadSchema.safeParse(structuredContent);
     if (detailResult.success) {
-      return mapStructuredContentToState(detailResult.data);
+      return mapStructuredContentToState(detailResult.data, toolOutput.toolName);
     }
 
     const editorResult = NoteEditorDraftPayloadSchema.safeParse(structuredContent);
     if (editorResult.success) {
-      return mapStructuredContentToState(editorResult.data);
+      return mapStructuredContentToState(editorResult.data, toolOutput.toolName);
     }
 
     return {
@@ -92,6 +104,7 @@ export const useStructuredContentState = (): StructuredContentState => {
         noteDetail: detailResult.error?.flatten(),
         noteEditorDraft: editorResult.error?.flatten(),
       },
+      toolName: toolOutput.toolName,
     };
   }, [toolOutput]);
 };
