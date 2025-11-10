@@ -3,7 +3,7 @@ export type OpenAiDisplayMode =
   | 'compact'
   | 'expanded'
   | 'full-screen'
-  | (string & {});
+  | (string & Record<never, never>);
 
 export type ToolOutputStatus = 'idle' | 'in_progress' | 'completed' | 'error';
 
