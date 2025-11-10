@@ -515,3 +515,14 @@
     flex-direction: column;
   }
 }
+
+@media (max-width: 600px) {
+  .widget-shell__main {
+    padding: 1rem;
+  }
+
+  .widget-shell__list-item,
+  .widget-shell__detail {
+    padding: 1rem;
+  }
+}
