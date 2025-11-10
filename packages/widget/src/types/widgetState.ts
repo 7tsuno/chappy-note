@@ -1,5 +1,16 @@
 import type { NoteEditorDraftPayload } from '@chappy/shared';
 
+export type NoteListFilters = {
+  tags: string[];
+  query: string;
+};
+
+export type NoteListWidgetState = {
+  filters: NoteListFilters;
+  lastRequestedTool: 'notes.list' | 'notes.search';
+  lastAppliedFilters: NoteListFilters;
+};
+
 export type NoteEditorFormValues = {
   title: string;
   tags: string[];
@@ -15,11 +26,28 @@ export type NoteEditorWidgetState = {
   showValidationErrors?: boolean;
 };
 
-export type WidgetState = {
+export type WidgetStateSnapshot = Record<string, unknown> & {
+  noteList?: NoteListWidgetState;
   noteEditor?: NoteEditorWidgetState;
 };
 
-export const createNoteEditorFormValues = (payload: NoteEditorDraftPayload): NoteEditorFormValues => ({
+export type WidgetState = WidgetStateSnapshot;
+
+export const DEFAULT_NOTE_LIST_STATE: NoteListWidgetState = {
+  filters: {
+    tags: [],
+    query: '',
+  },
+  lastRequestedTool: 'notes.list',
+  lastAppliedFilters: {
+    tags: [],
+    query: '',
+  },
+};
+
+export const createNoteEditorFormValues = (
+  payload: NoteEditorDraftPayload
+): NoteEditorFormValues => ({
   title: payload.draft.title ?? '',
   tags: [...(payload.draft.tags ?? [])],
   content: payload.draft.content ?? '',
