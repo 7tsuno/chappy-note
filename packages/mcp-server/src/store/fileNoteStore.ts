@@ -14,6 +14,7 @@ export interface CreateNoteInput {
   content: string;
   tags?: string[];
   summary?: string;
+  sourceConversationId?: string;
 }
 
 export interface UpdateNoteInput {
@@ -22,6 +23,7 @@ export interface UpdateNoteInput {
   content?: string;
   tags?: string[];
   summary?: string;
+  sourceConversationId?: string;
 }
 
 export interface SearchOptions {
@@ -34,7 +36,6 @@ interface IndexFile {
 }
 
 const INDEX_FILENAME = 'notes.index.json';
-const RELATIVE_NOTES_DIR = 'data/notes';
 
 export class FileNoteStore {
   private readonly notesDir: string;
@@ -65,12 +66,12 @@ export class FileNoteStore {
     const now = new Date().toISOString();
     const id = randomUUID();
     const tags = this.normalizeTags(input.tags);
-  const metadata: NoteMetadata = {
+    const metadata: NoteMetadata = {
       id,
       title: input.title,
       tags,
-      sourceConversationId: undefined,
-      contentPath: path.join(RELATIVE_NOTES_DIR, `${id}.md`),
+      sourceConversationId: input.sourceConversationId,
+      contentPath: this.contentFilePath(id),
       createdAt: now,
       updatedAt: now,
       summary: input.summary,
@@ -97,6 +98,7 @@ export class FileNoteStore {
       tags: input.tags ? this.normalizeTags(input.tags) : existing.tags,
       updatedAt: new Date().toISOString(),
       summary: input.summary ?? existing.summary,
+      sourceConversationId: input.sourceConversationId ?? existing.sourceConversationId,
     };
 
     const fallbackContent = await this.readRawContent(existing.id);
@@ -139,8 +141,10 @@ export class FileNoteStore {
     const results: NoteMetadata[] = [];
     for (const note of notes) {
       const content = await this.readRawContent(note.id);
+      const summary = note.summary?.toLowerCase() ?? '';
       if (
         note.title.toLowerCase().includes(query) ||
+        summary.includes(query) ||
         content.toLowerCase().includes(query)
       ) {
         results.push(note);
@@ -220,9 +224,15 @@ export class FileNoteStore {
     return path.join(this.rawDir, `${id}.txt`);
   }
 
+  private contentFilePath(id: string) {
+    return path.join(this.notesDir, `${id}.md`);
+  }
+
   private absoluteContentPath(contentPath: string) {
     if (path.isAbsolute(contentPath)) return contentPath;
-    const fileName = path.basename(contentPath);
-    return path.join(this.notesDir, fileName);
+    if (contentPath.startsWith('data/notes') || contentPath.startsWith('notes/')) {
+      return path.resolve(process.cwd(), contentPath);
+    }
+    return path.join(this.notesDir, contentPath);
   }
 }

@@ -22,7 +22,7 @@ afterEach(async () => {
 
 describe('FileNoteStore', () => {
   it('creates and retrieves notes', async () => {
-    const { store } = createStore();
+    const { store, root } = createStore();
     await store.init();
 
     const note = await store.createNote({
@@ -32,7 +32,8 @@ describe('FileNoteStore', () => {
     });
 
     expect(note.id).toBeDefined();
-    expect(note.contentPath).toBe(path.join('data/notes', `${note.id}.md`));
+    const expectedPath = path.join(root, 'data', 'notes', `${note.id}.md`);
+    expect(note.contentPath).toBe(expectedPath);
     const fetched = await store.getNote(note.id);
     expect(fetched?.content).toContain('Hello World');
     expect(fetched?.tags).toEqual(['test', 'hello']);
@@ -78,12 +79,14 @@ describe('FileNoteStore', () => {
       title: 'Async JS',
       content: 'JavaScript async awaits',
       tags: ['js', 'async'],
+      sourceConversationId: 'conv-async',
     });
 
     await store.createNote({
       title: 'React patterns',
       content: 'Components and hooks',
       tags: ['react'],
+      summary: 'Hooks summary',
     });
 
     const queryResults = await store.searchNotes({ query: 'async' });
@@ -91,5 +94,30 @@ describe('FileNoteStore', () => {
 
     const tagResults = await store.searchNotes({ tags: ['react'] });
     expect(tagResults).toHaveLength(1);
+
+    const summaryResults = await store.searchNotes({ query: 'summary' });
+    expect(summaryResults).toHaveLength(1);
+  });
+
+  it('stores and updates sourceConversationId metadata', async () => {
+    const { store } = createStore();
+    await store.init();
+
+    const created = await store.createNote({
+      title: 'Conversation linked',
+      content: 'Initial body',
+      sourceConversationId: 'conv-123',
+    });
+
+    expect(created.sourceConversationId).toBe('conv-123');
+
+    await store.updateNote({
+      id: created.id,
+      title: 'Conversation linked v2',
+      sourceConversationId: 'conv-456',
+    });
+
+    const fetched = await store.getNote(created.id);
+    expect(fetched?.sourceConversationId).toBe('conv-456');
   });
 });
