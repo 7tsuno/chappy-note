@@ -15,6 +15,7 @@ pnpm install
 | コマンド | 説明 |
 | --- | --- |
 | `pnpm --filter @chappy/widget dev` | ウィジェットをViteで起動 |
+| `pnpm --filter @chappy/widget storybook` | Widget Storybookをhttp://localhost:6006で起動 |
 | `pnpm --filter @chappy/mcp-server dev` | MCPサーバーを開発モードで起動 |
 | `pnpm build` | Turbo経由で全パッケージをビルド |
 | `pnpm lint` | ESLint (flat config) を実行 |
