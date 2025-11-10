@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo } from 'react';
 import type { PropsWithChildren } from 'react';
 import { ensureOpenAiRuntime, useApplyGlobalsEffect } from '../lib/openAiRuntime';
 import type {
+  EnhancedOpenAiWidgetRuntime,
   OpenAiDisplayMode,
   OpenAiGlobals,
   ToolOutputEnvelope,
@@ -21,10 +22,14 @@ interface OpenAiBridgeContextValue {
   subscribeToWidgetState: (listener: () => void) => () => void;
 }
 
+interface OpenAiBridgeProviderProps extends PropsWithChildren {
+  runtime?: EnhancedOpenAiWidgetRuntime;
+}
+
 const OpenAiBridgeContext = createContext<OpenAiBridgeContextValue | null>(null);
 
-export const OpenAiBridgeProvider = ({ children }: PropsWithChildren): JSX.Element => {
-  const runtime = useMemo(() => ensureOpenAiRuntime(), []);
+export const OpenAiBridgeProvider = ({ children, runtime: providedRuntime }: OpenAiBridgeProviderProps): JSX.Element => {
+  const runtime = useMemo(() => providedRuntime ?? ensureOpenAiRuntime(), [providedRuntime]);
 
   const getToolOutputSnapshot = useCallback(() => runtime.getToolOutputSnapshot(), [runtime]);
   const subscribeToToolOutput = useCallback(

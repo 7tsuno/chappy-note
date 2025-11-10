@@ -1,4 +1,4 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { WidgetShell } from '../components/WidgetShell/WidgetShell';
 import {
   noteDetailFixture,
@@ -6,7 +6,6 @@ import {
   notePreviewFixture,
 } from '@chappy/shared';
 import type { ToolOutputEnvelope } from '../types/openai';
-import { ensureOpenAiRuntime } from '../lib/openAiRuntime';
 
 const meta: Meta<typeof WidgetShell> = {
   title: 'Widget/WidgetShell',
@@ -21,86 +20,47 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-const setToolOutput = (output: ToolOutputEnvelope | undefined) => {
-  const runtime = ensureOpenAiRuntime();
-  runtime.__mock?.setToolOutput(output);
-};
-
-const setTheme = (mode: 'light' | 'dark') => {
-  const runtime = ensureOpenAiRuntime();
-  runtime.__mock?.setGlobals({
-    theme: {
-      mode,
+const withToolOutput = (toolOutput: ToolOutputEnvelope, themeMode: 'light' | 'dark' = 'light') => ({
+  parameters: {
+    openaiMock: {
+      toolOutput,
+      themeMode,
     },
-  });
-};
-
-const createDecorator = (setup: () => void): Decorator => {
-  return (Story) => {
-    setup();
-    return <Story />;
-  };
-};
+  },
+});
 
 export const Loading: Story = {
   name: 'Loading',
-  decorators: [
-    createDecorator(() => {
-      setTheme('light');
-      setToolOutput({ status: 'in_progress', toolName: 'notes.search' });
-    }),
-  ],
+  ...withToolOutput({ status: 'in_progress', toolName: 'notes.search' }),
 };
 
 export const ErrorState: Story = {
   name: 'Error',
-  decorators: [
-    createDecorator(() => {
-      setTheme('light');
-      setToolOutput({
-        status: 'error',
-        error: { message: 'データの取得に失敗しました。' },
-      });
-    }),
-  ],
+  ...withToolOutput({
+    status: 'error',
+    error: { message: 'データの取得に失敗しました。' },
+  }),
 };
 
 export const NoteList: Story = {
   name: 'Note list',
-  decorators: [
-    createDecorator(() => {
-      setTheme('light');
-      setToolOutput({ status: 'completed', structuredContent: notePreviewFixture });
-    }),
-  ],
+  ...withToolOutput({ status: 'completed', structuredContent: notePreviewFixture }),
 };
 
 export const NoteDetail: Story = {
   name: 'Note detail',
-  decorators: [
-    createDecorator(() => {
-      setTheme('light');
-      setToolOutput({ status: 'completed', structuredContent: noteDetailFixture });
-    }),
-  ],
+  ...withToolOutput({ status: 'completed', structuredContent: noteDetailFixture }),
 };
 
 export const NoteEditor: Story = {
   name: 'Note editor',
-  decorators: [
-    createDecorator(() => {
-      setTheme('light');
-      setToolOutput({ status: 'completed', structuredContent: noteEditorDraftFixture });
-    }),
-  ],
+  ...withToolOutput({ status: 'completed', structuredContent: noteEditorDraftFixture }),
 };
 
 export const DarkMode: Story = {
   name: 'Dark mode preview',
-  decorators: [
-    createDecorator(() => {
-      setTheme('dark');
-      setToolOutput({ status: 'completed', structuredContent: notePreviewFixture });
-    }),
-  ],
+  ...withToolOutput(
+    { status: 'completed', structuredContent: notePreviewFixture },
+    'dark'
+  ),
 };

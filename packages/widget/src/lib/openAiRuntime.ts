@@ -29,6 +29,12 @@ const DEFAULT_GLOBALS: OpenAiGlobals = {
 
 type Listener = () => void;
 
+type MockRuntimeOptions = {
+  toolOutput?: ToolOutputEnvelope;
+  globals?: OpenAiGlobals;
+  widgetState?: unknown;
+};
+
 type Observable<T> = {
   get: () => T;
   set: (value: T) => void;
@@ -185,6 +191,35 @@ export const ensureOpenAiRuntime = (): EnhancedOpenAiWidgetRuntime => {
   const enhanced = ensureEnhancedMethods(runtime);
   window.openai = enhanced;
   return enhanced;
+};
+
+const resolveGlobalsWithDefaults = (overrides?: OpenAiGlobals): OpenAiGlobals => {
+  const safeArea = overrides?.viewport?.safeAreaInset ?? {};
+
+  return {
+    theme: {
+      ...DEFAULT_THEME,
+      ...(overrides?.theme ?? {}),
+    },
+    viewport: {
+      safeAreaInset: {
+        top: safeArea.top ?? 0,
+        right: safeArea.right ?? 0,
+        bottom: safeArea.bottom ?? 0,
+        left: safeArea.left ?? 0,
+      },
+    },
+  };
+};
+
+export const createMockOpenAiRuntime = (options?: MockRuntimeOptions): EnhancedOpenAiWidgetRuntime => {
+  const runtime: InternalRuntime = {
+    toolOutput: options?.toolOutput,
+    globals: resolveGlobalsWithDefaults(options?.globals),
+    widgetState: options?.widgetState,
+  };
+
+  return ensureEnhancedMethods(runtime);
 };
 
 export const applyGlobalsToCssVariables = (globals: OpenAiGlobals) => {
